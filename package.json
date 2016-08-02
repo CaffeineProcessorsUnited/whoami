@@ -1,0 +1,29 @@
+{
+  "name": "whoami",
+  "version": "0.0.1",
+  "description": "Who am I guessing game",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CaffeineProcessorsUnited/whoami.git"
+  },
+  "keywords": [
+    "game",
+    "guess",
+    "who",
+    "am",
+    "i",
+    "zettel",
+    "brett",
+    "kopf"
+  ],
+  "author": "CaffeineProcessorsUnited",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/CaffeineProcessorsUnited/whoami/issues"
+  },
+  "homepage": "https://github.com/CaffeineProcessorsUnited/whoami#readme"
+}
