@@ -40,32 +40,6 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use(function(req, res, next) {
-  switch (req.body["action"]) {
-    case "createuser":
-      var name = req.body["name"];
-      var nameid = new Date().getTime() + "-" + name;
-      var id = crypto.createHash('sha1').update(nameid).digest("hex");
-      req.app.locals["users"][id] = {
-        "name": name
-      };
-      res.cookie('id', id, {});
-      res.redirect(req.path);
-      break;
-    default:
-      next();
-      break;
-  }
-});
-
-app.use(function(req, res, next) {
-  if (!req.cookies["id"] || !app.locals["users"][req.cookies["id"]]) {
-    res.render('createuser', { "title": "Join", "subtitle": "Choose a name:" });
-  } else {
-    next();
-  }
-});
-
 app.use('/', require('./routes/index')(app));
 app.use('/room', require('./routes/room')(app));
 

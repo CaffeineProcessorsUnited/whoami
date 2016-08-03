@@ -26,6 +26,13 @@ block content
             td= user.term
           - var guessedclass = (user.guessed ? 'guessed icon-check' : 'icon-cancel')
           td(class="guess #{guessedclass}")
+          td
+            if currentuser != user.id
+              form(method="POST", action=".")
+                input(type="hidden", name="action", value="markguessed")
+                input(type="hidden", name="user", value="#{user.id}")
+                input(type="submit", value="Guessed")
   else
     h3
       |  There are currently no other players.
+

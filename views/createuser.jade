@@ -3,6 +3,7 @@ extends layout
 block content
   h1= title
   h2= subtitle
+  h3= error
   form(method="POST", action=".")
     input(type="hidden", name="action", value="createuser")
     input(type="text", name="name")
