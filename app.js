@@ -11,9 +11,6 @@ var app = express();
 
 app.enable('strict routing');
 
-var routes = require('./routes/index')(app);
-var room = require('./routes/room')(app);
-
 app.locals["rooms"] = {};
 app.locals["users"] = {};
 
@@ -24,15 +21,22 @@ app.set('view engine', 'jade');
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(function(req, res, next) {
+  if (req.path.slice(-1) !== "/") {
+    res.redirect(req.path + "/");
+  } else {
+    next();
+  }
+});
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(function(req, res, next) {
   req.room = {};
-  // TODO: Add structure to save users with their term they need to guess
-  // TODO: load data from cookie into user
   next();
 });
 
@@ -62,8 +66,8 @@ app.use(function(req, res, next) {
   }
 });
 
-app.use('/', routes);
-app.use('/room', room);
+app.use('/', require('./routes/index')(app));
+app.use('/room', require('./routes/room')(app));
 
 app.use(slash());
 

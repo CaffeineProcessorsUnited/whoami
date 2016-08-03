@@ -51,10 +51,10 @@ module.exports = function(app) {
   });
 
   /* GET room. */
-  router.get('/:room/', function(req, res, next) {
+  router.all('/:room/', function(req, res, next) {
     var room = req.app.locals["rooms"][req.room["id"]];
     if (!room) {
-      var err = new Error('Not Found');
+      var err = new Error('Room does not exist!');
       err.status = 404;
       next(err);
     }
@@ -67,17 +67,26 @@ module.exports = function(app) {
         "guessed": false
       };
     }
+    if (req.body["action"] === "createterm") {
+      if (req.body["term"] != "" && req.body["user"] != "" && req.body["user"] != id) {
+        roomusers[req.body["user"]]["term"] = req.body["term"];
+      }
+    }
     var users = [];
     for (var k in roomusers) {
       if (roomusers.hasOwnProperty(k)) {
+        var term = roomusers[k]["term"];
+        term = (term === undefined || term === "") ? "" : term;
+        var show = (roomusers[k]["guessed"] === true || k != id);
+        term = (show) ? term : "_";
         users.push({
+          "id": k,
           "name": allusers[k]["name"],
-          "term": (roomusers[k]["guessed"] === true || k != id) ? roomusers[k]["term"] : "",
+          "term": term,
           "guessed": roomusers[k]["guessed"]
         });
       }
     }
-    console.log(users);
     res.render('room', { "room": room, "users": users });
   });
 

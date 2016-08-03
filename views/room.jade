@@ -1,13 +1,31 @@
 extends layout
 
+
 block content
+  - function obscure(s) { return s.replace(/./g,'-'); };
   h1= room.name
   if users.length
     table
-      each user, index in users
+      tr
+        th Name
+        th Term
+        th Guessed
+      - each user, index in users
         tr
           td= user.name
-          td= user.term == "" ? "hidden" : user.term
-          td= user.guessed ? "Guessed" : "Not guessed"
+          if user.term === ""
+            td
+              form(method="POST", action=".")
+                input(type="hidden", name="action", value="createterm")
+                input(type="hidden", name="user", value="#{user.id}")
+                input(type="text", name="term")
+                input(type="submit", value="Set")
+          else if user.term === "_"
+            td.hidden
+          else
+            td= user.term
+          - var guessedclass = (user.guessed ? 'guessed icon-check' : 'icon-cancel')
+          td(class="guess #{guessedclass}")
   else
-    h3 There are currently no other players.
+    h3
+      |  There are currently no other players.
