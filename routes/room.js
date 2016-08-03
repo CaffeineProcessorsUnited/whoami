@@ -46,7 +46,7 @@ module.exports = function(app) {
         errormsg = "Name is too short!";
       } else if (!(new RegExp("[A-Z 0-9ÄÖÜa]+", "i").test(name))) {
         errormsg = "Name contains invalid characters!";
-      }  
+      }
       if (errormsg != "") {
         res.render('createroom', { "title": "Create a new room", "subtitle": "Choose a name:", "error": errormsg });
       } else {
@@ -78,7 +78,7 @@ module.exports = function(app) {
         errormsg = "Name is too short!";
       } else if (!(new RegExp("[A-Z 0-9ÄÖÜa]+", "i").test(name))) {
         errormsg = "Name contains invalid characters!";
-      }  
+      }
       if (errormsg !== "") {
         res.render('createuser', { "title": "Join", "subtitle": "Choose a name:", "error": errormsg });
       } else {
@@ -129,6 +129,7 @@ module.exports = function(app) {
         }
       }
       res.render('room', { "room": room, "users": users, "currentuser": id });
+    }
   });
 
 
