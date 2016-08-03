@@ -1,35 +1,85 @@
 var express = require('express');
 var crypto = require('crypto');
-var router = express.Router();
 
-router.param('room', function(req, res, next, room) {
-  req.room["id"] = room;
-  next();
-});
+module.exports = function(app) {
+  var router = express.Router({
+    caseSensitive: app.get('case sensitive routing'),
+    strict       : app.get('strict routing')
+  });
 
-/* GET room listings. */
-router.get('/', function(req, res, next) {
-  res.send('All rooms: ');
-  // TODO: List all romms that exist
-});
+  router.param('room', function(req, res, next, id) {
+    req.room["id"] = id;
+    next();
+  });
 
-/* GET create room. */
-router.get('/create', function(req, res, next) {
-  console.log("create");
-  var room = new Date().getTime() + "-" + req.connection.remoteAddress;
-  var id = crypto.createHash('sha1').update(room).digest("hex");
-  res.send('Created room ' + id);
-  // TODO: redirect to '/room/' + id
-});
+  /* GET room listings. */
+  router.get('/', function(req, res, next) {
+    var allrooms = req.app.locals["rooms"];
+    var rooms = [];
+    for (var k in allrooms) {
+      if (allrooms.hasOwnProperty(k)) {
+        var count = 0;
+        for (var u in allrooms[k]["users"]) {
+          if (allrooms[k]["users"].hasOwnProperty(u)) {
+            count++;
+          }
+        }
+        rooms.push({
+          "id": k,
+          "name": allrooms[k]["name"],
+          "count": count
+        });
+      }
+    }
+    res.render('listrooms', { "title": "All rooms", "rooms": rooms });
+  });
 
-/* GET room. */
-router.get('/:room', function(req, res, next) {
-  console.log("room");
-  res.send('room = ' + req.room);
-  // TODO: user has id?
-  // TODO: create new user cookie
-  // TODO: load room
-  // TODO: create view
-});
+  /* GET create room. */
+  router.get('/create/', function(req, res, next) {
+    res.render('createroom', { "title": "Create a new room", "subtitle": "Choose a name:" });
+  });
 
-module.exports = router;
+  router.post('/create/', function(req, res, next) {
+    var name = req.body["name"];
+    var room = name + "-" + new Date().getTime() + "-" + req.connection.remoteAddress;
+    var id = crypto.createHash('sha1').update(room).digest("hex");
+    req.app.locals["rooms"][id] = {
+      "name": name,
+      "users": {}
+    };
+    res.redirect("/room/" + id + "/");
+  });
+
+  /* GET room. */
+  router.get('/:room/', function(req, res, next) {
+    var room = req.app.locals["rooms"][req.room["id"]];
+    if (!room) {
+      var err = new Error('Not Found');
+      err.status = 404;
+      next(err);
+    }
+    var roomusers = room["users"];
+    var allusers = req.app.locals["users"];
+    var id = req.cookies["id"];
+    if (!roomusers[id]) {
+      roomusers[id] = {
+        "term": undefined,
+        "guessed": false
+      };
+    }
+    var users = [];
+    for (var k in roomusers) {
+      if (roomusers.hasOwnProperty(k)) {
+        users.push({
+          "name": allusers[k]["name"],
+          "term": (roomusers[k]["guessed"] === true || k != id) ? roomusers[k]["term"] : "",
+          "guessed": roomusers[k]["guessed"]
+        });
+      }
+    }
+    console.log(users);
+    res.render('room', { "room": room, "users": users });
+  });
+
+  return router;
+};

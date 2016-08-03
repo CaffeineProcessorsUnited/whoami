@@ -1,0 +1,10 @@
+extends layout
+
+block content
+  h1= title
+  h2= subtitle
+  form(method="POST", action=".")
+    input(type="hidden", name="action", value="createroom")
+    input(type="text", name="name")
+    //-br
+    input(type="submit", value="Create")

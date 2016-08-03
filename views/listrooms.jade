@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  h1= title
+  if rooms.length
+    table
+      each room, index in rooms
+        tr
+          td= room.name
+          td= room.count
+          td
+            a(href="./#{room.id}") Join
+  else
+    h3
+      | There are currently no open rooms. You can #{''}
+      a(href="/room/create") create
+      | #{''} a new room

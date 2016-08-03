@@ -1,14 +1,21 @@
 var express = require('express');
+var slash   = require('express-slash');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-var routes = require('./routes/index');
-var room = require('./routes/room');
+var crypto = require('crypto');
 
 var app = express();
+
+app.enable('strict routing');
+
+var routes = require('./routes/index')(app);
+var room = require('./routes/room')(app);
+
+app.locals["rooms"] = {};
+app.locals["users"] = {};
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -25,13 +32,40 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(function(req, res, next) {
   req.room = {};
   // TODO: Add structure to save users with their term they need to guess
-  req.user = {};
   // TODO: load data from cookie into user
   next();
 });
 
+app.use(function(req, res, next) {
+  switch (req.body["action"]) {
+    case "createuser":
+      var name = req.body["name"];
+      var nameid = new Date().getTime() + "-" + name;
+      var id = crypto.createHash('sha1').update(nameid).digest("hex");
+      req.app.locals["users"][id] = {
+        "name": name
+      };
+      res.cookie('id', id, {});
+      res.redirect(req.path);
+      break;
+    default:
+      next();
+      break;
+  }
+});
+
+app.use(function(req, res, next) {
+  if (!req.cookies["id"] || !app.locals["users"][req.cookies["id"]]) {
+    res.render('createuser', { "title": "Join", "subtitle": "Choose a name:" });
+  } else {
+    next();
+  }
+});
+
 app.use('/', routes);
 app.use('/room', room);
+
+app.use(slash());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
